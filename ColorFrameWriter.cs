@@ -69,7 +69,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             string filename = current_phrase + "_color_" + image_count + ".bytes";
             image_count++;
             string filePath = MainWindow.dataWritePath + current_phrase + "\\" + session_number + "\\color\\" + filename;
-
             await WriteTextAsync(filePath, b);
         }
 

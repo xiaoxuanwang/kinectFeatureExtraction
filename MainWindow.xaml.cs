@@ -13,6 +13,7 @@
 
 namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 {
+    
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -39,10 +40,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
     {
         /// <summary> Active Kinect sensor </summary>
         private KinectSensor kinectSensor = null;
-        
+        public bool startRecording = false;
         /// <summary> Array for the bodies (Kinect will track up to 6 people simultaneously) </summary>
         private Body[] bodies = null;
-
+        public int nextrandom_phrase_inx_counter=0; 
         /// <summary> Reader for body frames </summary>
         private BodyFrameReader bodyFrameReader = null;
 
@@ -70,7 +71,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
         private string[] phrase_list = 
         {
-            "Alligator_behind_black_wall","Alligator_behind_blue_wagon","Alligator_behind_chair","Alligator_behind_orange_wagon","Alligator_behind_wall","Alligator_in_box","Alligator_in_orange_flowers","Alligator_in_wagon","Alligator_on_bed","Alligator_on_blue_wall","Alligator_under_green_bed","Black_Alligator_behind_orange_wagon","Black_cat_behind_green_bed","Black_cat_in_blue_wagon","Black_cat_on_green_bed","Black_Snake_under_blue_chair","Black_Spider_in_white_flowers","Blue_Alligator_on_green_wall","Blue_Spider_on_green_box","cat_behind_orange_bed","Cat_behind_bed","Cat_behind_box","Cat_behind_flowers","Cat_on_blue_bed","Cat_on_green_wall","Cat_on_wall","Cat_under_blue_bed","Cat_under_chair","cat_under_orange_chair" //,"Green_Alligator_under_blue_flowers","Green_Snake_under_blue_chair","Green_snake_under_blue_chair","Green_Spider_under_orange_chair","Orange_Alligator_in_green_flowers","Orange_Snake_under_blue_flowers","Orange_Spider_in_green_box","Orange_spider_under_green_flowers","Snake_behind_wall","Snake_in_flowers","Snake_in_green_wagon","Snake_on_box","Snake_under_bed","Snake_under_black_chair","Snake_under_blue_chair","Snake_under_blue_flowers","Snake_under_chair","Spider_under_bed","Spider_in_blue_box","Spider_in_box","Spider_in_green_box","Spider_in_orange_flowers","Spider_on_chair","Spider_on_wall","Spider_on_white_wall","Spider_under_blue_chair","Spider_under_wagon","White_snake_in_blue_flowers","White_Alligator_on_blue_wall","White_cat_in_green_box","White_cat_on_orange_wall"
+            "Alligator_behind_black_wall","Alligator_behind_blue_wagon","Alligator_behind_chair","Alligator_behind_orange_wagon","Alligator_behind_wall","Alligator_in_box","Alligator_in_orange_flowers","Alligator_in_wagon","Alligator_on_bed","Alligator_on_blue_wall","Alligator_under_green_bed","Black_Alligator_behind_orange_wagon","Black_cat_behind_green_bed","Black_cat_in_blue_wagon","Black_cat_on_green_bed","Black_Snake_under_blue_chair","Black_Spider_in_white_flowers","Blue_Alligator_on_green_wall","Blue_Spider_on_green_box","cat_behind_orange_bed","Cat_behind_bed","Cat_behind_box","Cat_behind_flowers","Cat_on_blue_bed","Cat_on_green_wall","Cat_on_wall","Cat_under_blue_bed","Cat_under_chair","cat_under_orange_chair" ,"Green_Alligator_under_blue_flowers","Green_Snake_under_blue_chair","Green_snake_under_blue_chair","Green_Spider_under_orange_chair","Orange_Alligator_in_green_flowers","Orange_Snake_under_blue_flowers","Orange_Spider_in_green_box","Orange_spider_under_green_flowers","Snake_behind_wall","Snake_in_flowers","Snake_in_green_wagon","Snake_on_box","Snake_under_bed","Snake_under_black_chair","Snake_under_blue_chair","Snake_under_blue_flowers","Snake_under_chair","Spider_under_bed","Spider_in_blue_box","Spider_in_box","Spider_in_green_box","Spider_in_orange_flowers","Spider_on_chair","Spider_on_wall","Spider_on_white_wall","Spider_under_blue_chair","Spider_under_wagon","White_snake_in_blue_flowers","White_Alligator_on_blue_wall","White_cat_in_green_box","White_cat_on_orange_wall"
         };
 
         private int[] phrase_indices = null;
@@ -102,14 +103,17 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         //############# PHRASE NAME ########################### PHRASE NAME ########################## PHRASE NAME ########################################
 
         private String phrase_name = "Alligator_behind_chair";
-
-        public static readonly string dataWritePath = @"C:\Users\aslr\Documents\z-aslr-data\";
+        //public static readonly string dataWritePath = @"F:\CopyCat\data\";
+        public static readonly string dataWritePath = @"C:\Users\aslr\Documents\datam\";
         /// <summary>
         /// Initializes a new instance of the MainWindow class
         /// </summary>
         public MainWindow()
         {
             // only one sensor is currently supported
+            InitializeComponent(); 
+            
+            
             this.kinectSensor = KinectSensor.GetDefault();
             
             // set IsAvailableChanged event notifier
@@ -168,6 +172,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 System.IO.StreamReader file = new System.IO.StreamReader(@".\indices_state.txt");
                 String indices_line = file.ReadLine();
                 String[] indices_states = indices_line.Split(' ');
+                
+                Console.WriteLine(indices_states.Length);
                 for (int i = 0; i < phrase_indices.Length; i++)
                 {
                     if (i >= indices_states.Length)
@@ -176,7 +182,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                     }
                     else
                     {
-                        this.phrase_indices[i] = Int32.Parse(indices_states[i]);
+                        Console.WriteLine(i+indices_states[i]);
+                        this.phrase_indices[i] = Int32.Parse(indices_states[i]);                       
+                            
                     }
 
                 }
@@ -311,6 +319,47 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
+        /// 
+
+
+        //#############################################################################################
+        
+        private void btnOpen_Click(object sender, RoutedEventArgs e)
+        {
+            // Configure open file dialog box 
+            
+
+
+
+            currentPhraseName.Text = phrase_list[current_phrase_index];
+            phrase_name = phrase_list[current_phrase_index];
+            /*clientInterface.sendData("new_phrase");
+            clientInterface.sendData(phrase_name);*/
+
+            String current_phrase = phrase_list[current_phrase_index];
+            char[] delims = { '_' };
+            String[] words = current_phrase.Split(delims);
+
+            StringBuilder builder = new StringBuilder();
+            foreach (string s in words)
+            {
+                builder.Append(s.ToLower()).Append(" ");
+            }
+            String cleanedPhrase = builder.ToString().TrimEnd(new char[] { ' ' });
+            cleanedPhrase += ".avi";
+            
+            MediaPlayer.Source = new Uri(System.IO.Path.Combine(
+            "C:\\Users\\aslr\\Documents\\copycat\\", cleanedPhrase));
+            MediaPlayer.Play();
+            
+
+        }
+
+        
+
+
+        //#############################################################################################
+
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             if (this.bodyFrameReader != null)
@@ -653,7 +702,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                         double handlY = handl.Position.Y;
                         double handrY = handr.Position.Y;
 
-                        double trig_hand, non_trig_hand;
+                        
 
                         bool value = (bool) dominantHand.IsChecked;
                         if (value)
@@ -667,19 +716,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                             dominantHandText.Text = "Right Handed.";
                         }
 
-                        if (leftHanded)
-                        {
-                            trig_hand = handlY;
-                            non_trig_hand = handrY;
-                        }
-                        else
-                        {
-                            trig_hand = handrY;
-                            non_trig_hand = handlY;
-                        }
+                        
 
-                        if (threshold > trig_hand)
+                        if (!startRecording)
                         {
+                            
                             //Console.WriteLine("YESS!");
                             rectangleFlag.Fill = rSolidColor;
                             if (textFlag.Text == "Stopped.")
@@ -692,7 +733,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 if (!raisedLeftHand)
                                 {
                                     //Erase the session data
-
+                                    Console.WriteLine("NOT recordig!!!");
                                     this.jointDataWriter.deleteLastSample(session_number); //clientInterface.sendData("delete");
                                     phrase_indices[current_phrase_index]--;
                                     colorQueue.Clear();
@@ -714,7 +755,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
                             }
                         }
-                        else if (threshold < trig_hand && textFlag.Text != "Stopped.")
+                        else if (startRecording && textFlag.Text != "Stopped.")
                         {
                             //Begin the data collection.
                             if (!startMode)
@@ -732,7 +773,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                             }
                             rectangleFlag.Fill = gSolidColor;
                             textFlag.Text = "Started!";
-                            if (threshold < non_trig_hand)
+                            if (startRecording)
                             {
                                 raisedLeftHand = true;
                             }
@@ -787,7 +828,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 }
             }
         }
-
+        
         bool raisedLeftHand = false;
         private String checkForHandLocation(Body body)
         {
@@ -931,7 +972,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             if (random_phrase_inx_counter == phrase_list.Length)
                 random_phrase_inx_counter = 0;
             current_phrase_index = random_phrase_indices[random_phrase_inx_counter++];
-
+            nextrandom_phrase_inx_counter = random_phrase_inx_counter; 
+            counting.Text = nextrandom_phrase_inx_counter.ToString(); 
             currentPhraseName.Text = phrase_list[current_phrase_index];
             phrase_name = phrase_list[current_phrase_index];
             /*clientInterface.sendData("new_phrase");
@@ -996,6 +1038,38 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         {
             scrClicked = false;
         }
+
+        private void startButton_Click(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("START_BUTTON_CLICKED.........................");
+            SolidColorBrush gSolidColor = new SolidColorBrush();
+            gSolidColor.Color = Color.FromRgb(0, 255, 0);
+            rectangleFlag.Fill = gSolidColor;
+            startRecording = true;
+        }
+
+        private void endButton_Click(object sender, RoutedEventArgs e)
+        {
+            startRecording = false;
+            SolidColorBrush bSolidColor = new SolidColorBrush();
+            bSolidColor.Color = Color.FromRgb(0, 0, 255);
+
+            rectangleFlag.Fill = bSolidColor;
+            Console.WriteLine("END_BUTTON_CLICKED.........................");
+
+        }
+
+        private void prevDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void playButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+
+
 
 
     }

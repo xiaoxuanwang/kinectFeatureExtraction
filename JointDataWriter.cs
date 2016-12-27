@@ -20,52 +20,55 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private bool paused;
         private bool writeOn;
 
-        public JointDataWriter(){
+        public JointDataWriter()
+        {
             this.sourceStream = null;
         }
 
-        public void pause(){    this.paused = true;     }
-        public void unpause(){  this.paused = false;    }
+        public void pause() { this.paused = true; }
+        public void unpause() { this.paused = false; }
 
         public void setCurrentPhrase(string p)
         {
             //if (!this.paused){
-                this.current_phrase = p;
-                this.phrase_file_count = 1;
+            this.current_phrase = p;
+            this.phrase_file_count = 1;
             //}
         }
 
         public void endPhrase()
         {
             //if (!this.paused){
-                if (this.sourceStream != null)
-                {
-                    this.sourceStream.Close();
-                    this.phrase_file_count++;
-                }
-                this.writeOn = false;
+            if (this.sourceStream != null)
+            {
+                this.sourceStream.Close();
+                this.phrase_file_count++;
+            }
+            this.writeOn = false;
             //}
         }
 
         public void deleteLastSample(int session_number)
         {
             //if (!this.paused){
-                if (this.sourceStream != null)
-                {
-                    this.sourceStream.Close();
-                }
-                this.phrase_file_count--;
-                File.Delete(MainWindow.dataWritePath + this.current_phrase + "\\" + session_number + "\\" + this.current_phrase + "_" + session_number/*this.phrase_file_count*/ + ".txt");
-                this.writeOn = false;
+            if (this.sourceStream != null)
+            {
+                this.sourceStream.Close();
+            }
+            this.phrase_file_count--;
+            File.Delete(MainWindow.dataWritePath + this.current_phrase + "\\" + session_number + "\\" + this.current_phrase + "_" + session_number/*this.phrase_file_count*/ + ".txt");
+            this.writeOn = false;
             //}
         }
 
         public void startNewPhrase(int session_number)
         {
             //if (!this.paused){
-                this.writeOn = true;
-                this.filePath = MainWindow.dataWritePath + this.current_phrase + "\\" + session_number + "\\" + this.current_phrase + "_" + session_number/*this.phrase_file_count*/ + ".txt";
-                this.sourceStream = new FileStream(this.filePath, FileMode.Append, FileAccess.Write, FileShare.None, bufferSize: 25000, useAsync: true);
+            this.writeOn = true;
+            this.filePath = MainWindow.dataWritePath + this.current_phrase + "\\" + session_number + "\\" + this.current_phrase + "_" + session_number/*this.phrase_file_count*/ + ".txt";
+
+            this.sourceStream = new FileStream(this.filePath, FileMode.Append, FileAccess.Write, FileShare.None, bufferSize: 25000, useAsync: true);
+          
             //}
         }
 
@@ -79,6 +82,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 await sourceStream.WriteAsync(b, 0, b.Length);
             }
             //}
+        }
+
+        public void markAsBadSample(int session_number)
+        {
+
+            String bad_sample_file = this.filePath = MainWindow.dataWritePath + this.current_phrase + "\\" + session_number + "\\" + "bad_sample.txt";
+
+            FileStream f = System.IO.File.Create(bad_sample_file);
+            f.Close();
         }
 
         /*
@@ -95,7 +107,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             };
         }
         */
-        
+
 
     }
 }
