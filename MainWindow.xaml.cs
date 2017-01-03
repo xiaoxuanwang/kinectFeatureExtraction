@@ -13,7 +13,15 @@
 
 namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 {
-    
+//    using Microsoft.Xna.Framework;
+//    using Microsoft.Xna.Framework.Audio;
+//    using Microsoft.Xna.Framework.Content;
+//    using Microsoft.Xna.Framework.GamerServices;
+//    using Microsoft.Xna.Framework.Graphics;
+//    using Microsoft.Xna.Framework.Input;
+//    using Microsoft.Xna.Framework.Media;
+//    using Microsoft.Xna.Framework.Net;
+//    using Microsoft.Xna.Framework.Storage;
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -31,6 +39,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
     using System.IO;
     using System.Diagnostics;
     using System.Text;
+    using SharpDX.XInput;
+    using System.Windows.Automation.Peers;
+    using System.Windows.Automation.Provider;
    //#using Microsoft.Xna.Framework;
     //using SlimDX;
     /// <summary>
@@ -40,6 +51,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
     {
         /// <summary> Active Kinect sensor </summary>
         private KinectSensor kinectSensor = null;
+        
+        Controller controller;
+        Gamepad gamepad;
+        State state;
+        public bool connected = false;
+        public float leftTrigger, rightTrigger;
+        public bool flag_y = false;
         public bool startRecording = false;
         /// <summary> Array for the bodies (Kinect will track up to 6 people simultaneously) </summary>
         private Body[] bodies = null;
@@ -104,16 +122,18 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
         private String phrase_name = "Alligator_behind_chair";
         //public static readonly string dataWritePath = @"F:\CopyCat\data\";
-        public static readonly string dataWritePath = @"C:\Users\aslr\Documents\datam\";
+        public static readonly string dataWritePath = @"C:\Users\aslr\Documents\datakmd\";
         /// <summary>
         /// Initializes a new instance of the MainWindow class
         /// </summary>
         public MainWindow()
         {
             // only one sensor is currently supported
-            InitializeComponent(); 
-            
-            
+            InitializeComponent();
+
+            controller = new Controller(UserIndex.One);
+            connected = controller.IsConnected;
+
             this.kinectSensor = KinectSensor.GetDefault();
             
             // set IsAvailableChanged event notifier
@@ -444,6 +464,17 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             {
                 if (frame != null)
                 {
+
+                    if (!connected)
+                        return;
+
+                    gamepad = controller.GetState().Gamepad;
+                    //Console.WriteLine("i am here");
+                    //checkTrial();
+
+
+
+
                     if ((!paused && startMode) || scrClicked)
                     {              
                         int width = frame.FrameDescription.Width;
@@ -477,6 +508,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             /// Handle the depth frame 
             using (var frame = reference.DepthFrameReference.AcquireFrame())
             {
+               
                 if (frame != null)
                 {
                     if ((!paused && startMode) || scrClicked)
@@ -651,7 +683,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             bool dataReceived = false;
-
+            checkTrial();
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
             {
                 if (bodyFrame != null)
@@ -721,7 +753,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                         if (!startRecording)
                         {
                             
-                            //Console.WriteLine("YESS!");
+                            //Console.WriteLine("Not of startRecording!");
                             rectangleFlag.Fill = rSolidColor;
                             if (textFlag.Text == "Stopped.")
                             {
@@ -929,6 +961,103 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             else return val;
         }
 
+
+        public void checkTrial()
+        {
+            if (!connected)
+                return;
+           
+            //Console.WriteLine("in check trial");
+            gamepad = controller.GetState().Gamepad;
+
+            if (gamepad.Buttons == GamepadButtonFlags.A)
+            {
+                Console.WriteLine("A pressed");
+                /*SolidColorBrush gSolidColor = new SolidColorBrush();
+                gSolidColor.Color = Color.FromRgb(0, 255, 0);
+                rectangleFlag.Fill = gSolidColor;
+                Console.WriteLine("green");
+                startRecording = true;*/
+                ButtonAutomationPeer peer =
+                        new ButtonAutomationPeer(startButton);
+
+                IInvokeProvider invokeProv =
+                  peer.GetPattern(PatternInterface.Invoke)
+                  as IInvokeProvider;
+
+                invokeProv.Invoke();
+
+            }
+            if (gamepad.Buttons == GamepadButtonFlags.B)
+            {
+                Console.WriteLine("B pressed");
+                /*startRecording = false;
+                SolidColorBrush bSolidColor1 = new SolidColorBrush();
+                bSolidColor1.Color = Color.FromRgb(0, 0, 255);
+                rectangleFlag.Fill = bSolidColor1;
+                Console.WriteLine("blue");*/
+                ButtonAutomationPeer peer =
+                        new ButtonAutomationPeer(endButton);
+
+                IInvokeProvider invokeProv =
+                  peer.GetPattern(PatternInterface.Invoke)
+                  as IInvokeProvider;
+
+                invokeProv.Invoke();
+                
+            }
+
+            if (gamepad.Buttons == GamepadButtonFlags.X)
+            {
+                ButtonAutomationPeer peer =
+                        new ButtonAutomationPeer(btnOpen);
+
+                IInvokeProvider invokeProv =
+                  peer.GetPattern(PatternInterface.Invoke)
+                  as IInvokeProvider;
+
+                invokeProv.Invoke();
+            }
+            if (gamepad.Buttons == GamepadButtonFlags.Y)
+            {
+                if (flag_y == false)
+                {
+                    flag_y = true;
+                    ButtonAutomationPeer peer =
+                        new ButtonAutomationPeer(nextPhrase);
+
+                    IInvokeProvider invokeProv =
+                      peer.GetPattern(PatternInterface.Invoke)
+                      as IInvokeProvider;
+
+                    invokeProv.Invoke();
+                    
+                }
+
+            }
+            else
+            {
+                flag_y = false;
+            }
+            leftTrigger = gamepad.LeftTrigger;
+            rightTrigger = gamepad.RightTrigger;
+            //Console.WriteLine("left trigger : "+leftTrigger);
+            //Console.WriteLine("right trigger : " + rightTrigger);
+        }
+
+
+        public void trial(object sender, EventArgs e)
+        {
+            ButtonAutomationPeer peer =
+                        new ButtonAutomationPeer(btnOpen);
+
+            IInvokeProvider invokeProv =
+              peer.GetPattern(PatternInterface.Invoke)
+              as IInvokeProvider;
+
+            invokeProv.Invoke();
+        }
+
         private void deletePreviousSample(object sender, RoutedEventArgs e)
         {
             this.jointDataWriter.deleteLastSample(session_number); //clientInterface.sendData("delete");
@@ -1046,17 +1175,19 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             gSolidColor.Color = Color.FromRgb(0, 255, 0);
             rectangleFlag.Fill = gSolidColor;
             startRecording = true;
+            
         }
 
         private void endButton_Click(object sender, RoutedEventArgs e)
         {
+            
             startRecording = false;
             SolidColorBrush bSolidColor = new SolidColorBrush();
             bSolidColor.Color = Color.FromRgb(0, 0, 255);
 
             rectangleFlag.Fill = bSolidColor;
             Console.WriteLine("END_BUTTON_CLICKED.........................");
-
+            
         }
 
         private void prevDeleteButton_Click(object sender, RoutedEventArgs e)
